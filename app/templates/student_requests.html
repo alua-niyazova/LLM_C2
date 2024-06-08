@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher's Requests</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .nav-bar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .nav-bar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .nav-bar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        .flashes {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flashes li {
+            margin: 0.5em;
+            padding: 0.5em;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .success {
+            color: white;
+            background-color: green;
+        }
+
+        .error {
+            background-color: red;
+        }
+
+        .info {
+            background-color: blue;
+        }
+
+        .message {
+            background-color: orange;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="nav-bar">
+    <a href="{{ url_for('topic.topicsearch') }}">Search</a>
+    <a href="{{ url_for('user.logout') }}">Logout</a>
+</div>
+
+<div class="container mt-4">
+    <h1>All Requests</h1>
+
+
+    <!-- Navigation -->
+    <ul class="nav nav-tabs">
+        {% for type in request_types %}
+        <li class="nav-item">
+            <a href="#{{ type.name }}" class="nav-link" data-toggle="tab">{{ type.name }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        {% for type in request_types %}
+        <div class="tab-pane fade" id="{{ type.name }}" role="tabpanel">
+            <table class="table table-bordered mt-3">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    {% if type.name == 'ADD_TOPIC' %}
+                    <th>Topic</th>
+                    <th>Subtopic</th>
+                    <th>Course Type</th>
+                    <th>Topic question</th>
+                    <th>Topic answer</th>
+                    <th>Course ID</th>
+                    {% endif %}
+                    {% if type.name == 'EXPERIMENT' %}
+                    <th>Question ID</th>
+                    <th>New Variation Number</th>
+                    <th>New Variation Text</th>
+                    <th>LLM Name</th>
+                    <th>Score</th>
+                    <th>Comment</th>
+                    <th>Answer Image</th>
+                    {% endif %}
+
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for request in requests if request.request_type == type %}
+                <tr>
+                    <td>{{ request.id }}</td>
+                    {% if type.name == 'ADD_TOPIC' %}
+                    <td>{{ request.col1 }}</td>
+                    <td>{{ request.col2 }}</td>
+                    <td>{{ request.col3 }}</td>
+                    <td>{{ request.col4 }}</td>
+                    <td><img src="{{ request.col5 }}" alter="image.jpg"></td>
+                    <td>{{ request.col6 }}</td>
+                    {% endif %}
+                    {% if type.name == 'EXPERIMENT' %}
+                    <td>{{ request.col1 }}</td>
+                    <td>{{ request.col2 }}</td>
+                    <td>{{ request.col3 }}</td>
+                    <td>{{ request.col4 }}</td>
+                    <td>{{ request.col5 }}</td>
+                    <td>{{ request.col6 }}</td>
+                    <td><img src="{{ request.col7 }}" alter="image.jpg"></td>
+                    {% endif %}
+
+                    <td>{{ request.status.name }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">No requests found for {{ type.name }}.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="flashes">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+</div>
+
+
+<script>
+    $(function () {
+        // Activate the first tab to show it by default
+        $('.nav-tabs a:first').tab('show');
+    });
+
+
+</script>
+</body>
+</html>

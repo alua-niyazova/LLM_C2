@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Course</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: #ff0000;
+            text-align: center;
+        }
+
+        label, input[type="radio"] {
+        display: inline-block;
+        margin-right: 1px;
+        }
+
+        .nav-bar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .nav-bar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .nav-bar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        .flashes {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flashes li {
+            margin: 0.5em;
+            padding: 0.5em;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .success {
+            color: white;
+            background-color: green;
+        }
+
+        .error {
+            background-color: red;
+        }
+
+        .info {
+            background-color: blue;
+        }
+
+        .message {
+            background-color: orange;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="{{ url_for('search.search') }}">Search</a>
+        <a href="{{ url_for('request.view_requests') }}">Requests</a>
+        <a href="{{ url_for('exp.view_exp') }}">Experiments</a>
+        <a href="{{ url_for('course.list_courses') }}">Courses</a>
+        <a href="{{ url_for('user.logout') }}">Logout</a>
+    </div>
+    <h1>Request to Add a New Course</h1>
+    <form method="POST" action="{{ url_for('course.add_course') }}">
+        <div>
+            <label for="name">Course Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <label for="number">Course Number:</label>
+            <input type="text" id="number" name="number" required>
+        </div>
+        <div>
+            <label for="category">Course Category:</label>
+            <select id="category" name="category" required>
+                <option value="Comp">Computers and programming</option>
+                <option value="Math">Math</option>
+                <option value="Writ">Writing</option>
+            </select>
+        </div>
+        <br>
+        <div>
+            <button type="submit">Submit Request</button>
+            <br><br>
+            <button onclick="location.href='{{ url_for('course.list_courses') }}'" type="button">Back to Course List</button>
+        </div>
+
+    </form>
+
+    <div  class="flashes">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul  class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+</body>
+</html>

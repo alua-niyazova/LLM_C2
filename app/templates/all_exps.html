@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Experiments</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .nav-bar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .nav-bar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .nav-bar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        .flashes {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flashes li {
+            margin: 0.5em;
+            padding: 0.5em;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .success {
+            color: white;
+            background-color: green;
+        }
+
+        .error {
+            background-color: red;
+        }
+
+        .info {
+            background-color: blue;
+        }
+
+        .message {
+            background-color: orange;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="{{ url_for('search.search') }}">Search</a>
+        <a href="{{ url_for('request.view_requests') }}">Requests</a>
+        <a href="{{ url_for('course.list_courses') }}">Courses</a>
+        <a href="{{ url_for('user.logout') }}">Logout</a>
+    </div>
+    <div class="container mt-4">
+        <h1>All Experiments</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Question Code</th>
+                    <th>Question Text</th>
+                    <th>LLM Name</th>
+                    <th>Score</th>
+                    <th>Comment</th>
+                    <th>Answer Image</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exp in exps %}
+                <tr>
+                    <td>{{ exp.id }}</td>
+                    <td>{{ exp.vCode }}</td>
+                    <td>{{ exp.vText }}</td>
+                    <td>{{ exp.LLM_name }}</td>
+                    <td>{{ exp.score }}</td>
+                    <td>{{ exp.comment }}</td>
+                    <td><img src="{{ exp.answer_img }}" alt="Experiment Image" style="width:100px;"></td>
+                    <td>{{ exp.status.name }}</td>
+                    <td>
+                        {% if exp.status.name == 'NOT_SUBMITTED' %}
+                            <a href="{{ url_for('exp.exp_request', exp_id=exp.id) }}" class="btn btn-info btn-sm">Submit Request</a>
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm" disabled>No Action Needed</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8">No experiments found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div  class="flashes">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul  class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+</body>
+</html>

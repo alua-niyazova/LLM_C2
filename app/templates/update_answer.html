@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Title</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .button {
+            width: 94%;
+            display: inline-block;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: #ff0000;
+            text-align: center;
+        }
+
+        label, input[type="radio"] {
+        display: inline-block;
+        margin-right: 1px;
+        }
+
+        .nav-bar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .nav-bar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .nav-bar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        .flashes {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flashes li {
+            margin: 0.5em;
+            padding: 0.5em;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .success {
+            color: white;
+            background-color: green;
+        }
+
+        .error {
+            background-color: red;
+        }
+
+        .info {
+            background-color: blue;
+        }
+
+        .message {
+            background-color: orange;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="{{ url_for('search.search') }}">Search</a>
+        <a href="{{ url_for('request.view_requests') }}">Requests</a>
+        <a href="{{ url_for('exp.view_exp') }}">Experiments</a>
+        <a href="{{ url_for('course.list_courses') }}">Courses</a>
+        <a href="{{ url_for('user.logout') }}">Logout</a>
+    </div>
+    <h1>Update A Question</h1>
+    <form method="POST" action="{{ url_for('search.update_score', answer_id=answer.id) }}">
+        <div>
+            <label for="score">Score:</label>
+            <input type="number" id="score" name="score" min="0" max="5" step="1" value="{{ answer._LLM_Score }}" required>
+        </div>
+        <div>
+            <label for="comment">Comment:</label>
+            <textarea id="comment" name="comment" required>{{ answer._comments }}</textarea>
+        </div>
+        <div>
+            <button type="submit">Update Answer</button>
+        </div>
+        <br>
+        {% if error_message %}
+            <p class="error">{{ error_message }}</p>
+        {% endif %}
+        <a class="button" href="{{ url_for('search.search') }} ">Back to All Answers</a>
+    </form>
+    <div  class="flashes">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul  class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+
+</body>
+</html>

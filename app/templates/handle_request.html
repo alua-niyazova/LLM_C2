@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handle Request</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+         button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .flashes {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flashes li {
+            margin: 0.5em;
+            padding: 0.5em;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .success {
+            color: white;
+            background-color: green;
+        }
+
+        .error {
+            background-color: red;
+        }
+
+        .info {
+            background-color: blue;
+        }
+
+        .message {
+            background-color: orange;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Handle Request</h1>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Request Details</h5>
+                <p class="card-text">Request ID: {{ request.id }}</p>
+                <p class="card-text">Request Type: {{ request.request_type.name }}</p>
+                {% if request.request_type.name == 'ADD_COURSE' %}
+                <p class="card-text">Course Name: {{ request.col1 }}</p>
+                <p class="card-text">Course Number: {{ request.col2 }}</p>
+                <p class="card-text">Category: {{ request.col3 }}</p>
+                {% endif %}
+                {% if request.request_type.name == 'ADD_QUESTION' %}
+                <p class="card-text">Question Number: {{ request.col1 }}</p>
+                <p class="card-text">Question Text: {{ request.col2 }}</p>
+                <p class="card-text">Course ID: {{ request.col3 }}</p>
+                <p class="card-text">LLM Name: {{ request.col4 }}</p>
+                <p class="card-text">Score: {{ request.col5 }}</p>
+                <p class="card-text">Comment: {{ request.col6 }}</p>
+                <img src="{{ request.col7 }}" alt="image.jpg">
+                {% endif %}
+                {% if request.request_type.name == 'UPDATE_SCORE' %}
+                <p class="card-text">Answer ID: {{ request.col1 }}</p>
+                <p class="card-text">New Score: {{ request.col2 }}</p>
+                <p class="card-text">Explanation: {{ request.col3 }}</p>
+                {% endif %}
+                {% if request.request_type.name == 'EXPERIMENT' %}
+                <p class="card-text">Question ID: {{ request.col1 }}</p>
+                <p class="card-text">New Variation Number: {{ request.col2 }}</p>
+                <p class="card-text">New Variation Text: {{ request.col3 }}</p>
+                <p class="card-text">LLM Name: {{ request.col4 }}</p>
+                <p class="card-text">Score: {{ request.col5 }}</p>
+                <p class="card-text">Comment: {{ request.col6 }}</p>
+                <img src="{{ request.col7 }}" alter="image.jpg">
+                {% endif %}
+                                {% if request.request_type.name == 'ADD_TOPIC' %}
+                <p class="card-text">New Topic: {{ request.col1 }}</p>
+                <p class="card-text">New Subtopic: {{ request.col2 }}</p>
+                <p class="card-text">Course category: {{ request.col3 }}</p>
+                <p class="card-text">Topic question: {{ request.col4 }}</p>
+                <img src="{{ request.col5 }}" alt="image.jpg">
+                <p class="card-text">Course ID:: {{ request.col6 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <form action="{{ url_for('request.handle_requests', request_id=request.id) }}" method="POST">
+            <div class="form-group mt-3">
+                <label for="decision">Decision</label>
+                <select class="form-control" id="decision" name="decision">
+                    <option value="pass">Pass</option>
+                    <option value="reject">Reject</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Decision</button>
+            <br><br>
+            <button onclick="location.href='{{ url_for('request.view_requests') }}'" type="button">Back</button>
+        </form>
+    </div>
+
+    <div class="flashes">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class="flashes">
+            {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>

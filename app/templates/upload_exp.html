@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Experiment</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .nav-bar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .nav-bar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .nav-bar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        .flashes {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flashes li {
+            margin: 0.5em;
+            padding: 0.5em;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .success {
+            color: white;
+            background-color: green;
+        }
+
+        .error {
+            background-color: red;
+        }
+
+        .info {
+            background-color: blue;
+        }
+
+        .message {
+            background-color: orange;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="{{ url_for('search.search') }}">Search</a>
+        <a href="{{ url_for('request.view_requests') }}">Requests</a>
+        <a href="{{ url_for('exp.view_exp') }}">Experiments</a>
+        <a href="{{ url_for('course.list_courses') }}">Courses</a>
+        <a href="{{ url_for('user.logout') }}">Logout</a>
+    </div>
+    <div class="container mt-4">
+
+        <h1>Upload New Experiment</h1>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Question Details</h5>
+                <p class="card-text">Question Code: {{ question.qCode }}</p>
+                <p class="card-text">Question Text: {{ question.qText }}</p>
+                <p class="card-text">Course: {{ question.course.name }}</p>
+            </div>
+        </div>
+
+        <!-- Form to upload new experiment -->
+        <form action="{{ url_for('exp.exp_upload', question_id=question.id) }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="vCode">Variation Code</label>
+                <input type="text" class="form-control" id="vCode" name="vCode" required>
+            </div>
+            <div class="form-group">
+                <label for="vText">Variation Text</label>
+                <input type="text" class="form-control" id="vText" name="vText" required>
+            </div>
+            <div class="form-group">
+                <label for="LLM_name">LLM Name</label>
+                <input type="text" class="form-control" id="LLM_name" name="LLM_name" required>
+            </div>
+            <div class="form-group">
+                <label for="score">Score</label>
+                <input type="number" class="form-control" id="score" name="score" min="0" max="5" step="1" required>
+            </div>
+            <div class="form-group">
+                <label for="comment">Comment</label>
+                <input type="text" class="form-control" id="comment" name="comment" required>
+            </div>
+            <div class="form-group">
+                <label for="answer_img">Answer Image</label>
+                <input type="file" class="form-control-file" id="answer_img" name="answer_img" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button onclick="location.href='{{ url_for('exp.view_exp') }}'" type="button" class="btn btn-primary">Back</button>
+        </form>
+    </div>
+
+    <div  class="flashes">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul  class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+</body>
+</html>

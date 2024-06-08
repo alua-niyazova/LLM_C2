@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic Search</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!--experiment-->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin-top: 20px;
+        }
+        .container {
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1, h2, h3, h4 {
+            color: #333;
+        }
+        .table-responsive {
+            margin-bottom: 40px;
+        }
+        #resultTableTitle {
+            margin-top: 50px; /* More space above the results title */
+            color: #0056b3; /* Different color */
+            border-top: 2px solid #dee2e6; /* Line separation */
+            padding-top: 20px; /* Padding to distance from line */
+        }
+        .table {
+            margin-top: 10px;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {background-color: #f5f5f5;}
+       .search-form {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.search-input {
+    width: 50%;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+}
+
+.search-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #808080;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 2px 2px 5px #666;
+}
+
+.search-button:hover {
+    background-color: #666;
+    box-shadow: 3px 3px 8px #444;
+}
+
+        .nav-bar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+                .nav-bar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .nav-bar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+.section-separator {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 0;
+    height: 1px;
+    background: #333;
+    background-image: linear-gradient(to right, #ccc, #333, #ccc);
+}
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="{{ url_for('request.view_requests') }}">Request</a>
+        <a href="{{ url_for('user.logout') }}">Logout</a>
+    </div>
+<div class="container">
+    <h1>Course Type List Selecting Search</h1>
+    <div id="coursetypes" class="table-responsive"></div>
+    <h2>Select a Topic</h2>
+    <div id="topics" class="table-responsive"></div>
+    <h3>Select a Subtopic</h3>
+    <div id="subtopics" class="table-responsive"></div>
+
+    <!-- Adding a horizontal line for visual separation -->
+    <hr class="section-separator">
+
+    <h4>Questions and Answers</h4>
+    <button id="navigateButton" class="btn btn-success" onclick="navigateToPage()">View All My Experiments</button>
+    <button class="btn btn-success" onclick="location.href='{{ url_for('topic.add_topic') }}'" type="button"  class="button">Add a Topic</button>
+    <div id="helptopics" class="table-responsive"></div>
+
+    <form action="{{ url_for('topic.topicsearch') }}" method="post" class="search-form">
+        <input type="text" name="content" id="content" placeholder="Search By Course Name" class="search-input">
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+    <h1 id="resultTableTitle">Course Name Search Result Table</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Course Type</th>
+                <th>Course</th>
+                <th>Course ID</th>
+                <th>Topic</th>
+                <th>Subtopic</th>
+                <th>Topic Question</th>
+                <th>Topic Answer</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in quotes %}
+            <tr>
+                <td>{{ i.coursetype }}</td>
+                <td>{{ i.course.cName }}</td> <!-- Ensure you are accessing cName correctly -->
+                <td>{{ i.topicid }}</td>
+                <td>{{ i.topic }}</td>
+                <td>{{ i.subtopic }}</td>
+                <td>{{ i.topicq }}</td>
+                <td>{{ i.topica }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+
+<!-- experience -->
+<div class="modal fade" id="experimentModal" tabindex="-1" role="dialog" aria-labelledby="experimentModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="experimentModalLabel">Please conduct your experiment</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="experimentForm">
+          <div class="form-group">
+            <label for="questionInput">Please revise your question</label>
+            <input type="text" class="form-control" id="questionInput" placeholder="Enter question">
+          </div>
+          <div class="form-group">
+            <label for="llmInput">LLM used</label>
+            <input type="text" class="form-control" id="llmInput" placeholder="Enter LLM used">
+          </div>
+          <div class="form-group">
+            <label for="answerInput">LLM answer</label>
+            <input type="text" class="form-control" id="answerInput" placeholder="Enter LLM answer">
+          </div>
+          <div class="form-group">
+            <label for="scoreInput">Answer usefulness score</label>
+            <input type="number" class="form-control" id="scoreInput" placeholder="Enter score (0-10)">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Off</button>
+        <button type="button" class="btn btn-primary" onclick="submitExperimentData()">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--success message-->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="successModalLabel">Success</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Experiment data added successfully!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    loadCourseTypes();
+
+    $(document).on('click', '.coursetype-btn', function() {
+        loadTopics($(this).data('id'));
+    });
+
+    $(document).on('click', '.topic-btn', function() {
+        loadSubTopics($(this).data('id'));
+    });
+
+    $(document).on('click', '.subtopic-btn', function() {
+        loadHelpTopics($(this).data('id'));
+    });
+});
+
+function loadCourseTypes() {
+    $.getJSON('{{ url_for("topic.get_coursetypes") }}', function(data) {
+        var table = '<table class="table"><thead><tr><th>Course Type</th></tr></thead><tbody>';
+        data.forEach(function(ct) {
+            table += '<tr><td><button class="btn btn-info coursetype-btn" data-id="' + ct.name + '">' + ct.name + '</button></td></tr>';
+        });
+        table += '</tbody></table>';
+        $('#coursetypes').html(table);
+    });
+}
+
+function loadTopics(coursetype) {
+    $.getJSON('{{ url_for("topic.get_topics", coursetype="placeholder") }}'.replace('placeholder', coursetype), function(data) {
+        var table = '<table class="table"><thead><tr><th>Topic</th></tr></thead><tbody>';
+        data.forEach(function(t) {
+            table += '<tr><td><button class="btn btn-secondary topic-btn" data-id="' + t.name + '">' + t.name + '</button></td></tr>';
+        });
+        table += '</tbody></table>';
+        $('#topics').html(table);
+    });
+}
+
+function loadSubTopics(topic) {
+    $.getJSON('{{ url_for("topic.get_subtopics", topic="dummy") }}'.replace('dummy', topic), function(data) {
+        var table = '<table class="table"><thead><tr><th>Subtopic</th></tr></thead><tbody>';
+        data.forEach(function(st) {
+            table += '<tr><td><button class="btn btn-primary subtopic-btn" data-id="' + st.name + '">' + st.name + '</button></td></tr>';
+        });
+        table += '</tbody></table>';
+        $('#subtopics').html(table);
+        $('#helptopics').html(''); // Clear the help topics area
+    });
+}
+
+<!--function loadHelpTopics(subtopic) {-->
+<!--    $.getJSON('{{ url_for("topic.get_helptopics", subtopic="dummy") }}'.replace('dummy', subtopic), function(data) {-->
+<!--        var table = '<table class="table"><thead><tr><th>Question</th><th>Answer</th></tr></thead><tbody>';-->
+<!--        data.forEach(function(ht) {-->
+<!--            table += '<tr><td>' + ht.question + '</td><td>' + ht.answer + '</td></tr>';//gai-->
+<!--        });-->
+<!--        table += '</tbody></table>';-->
+<!--        $('#helptopics').html(table);-->
+<!--    });-->
+<!--}-->
+
+<!--加了experiment-->
+    function loadHelpTopics(subtopic) {
+    // 发送 GET 请求到服务器，获取与特定子话题相关的帮助主题。
+    $.getJSON('{{ url_for("topic.get_helptopics", subtopic="dummy") }}'.replace('dummy', subtopic), function(data) {
+        // 初始化表格结构，表头包含 '问题' 和 '答案'。
+        var table = '<table class="table"><thead><tr><th>Question</th><th>Answer</th><th>Operation</th></tr></thead><tbody>';
+;
+
+        // 遍历从服务器获取的每一个帮助主题。
+        data.forEach(function(ht) {
+            // 为每个帮助主题添加一行，包含问题、答案和一个 "Experiment" 按钮。
+            table += '<tr><td>' + ht.question + '</td><td>' + ht.answer + '</td>' +
+                     '<td><button class="btn btn-primary" onclick="experimentHandler(\'' + ht.question + '\')">Experiment</button></td></tr>';
+        });
+
+        // 关闭表格体和表格元素。
+        table += '</tbody></table>';
+        // 更新 ID 为 'helptopics' 的元素的 HTML 内容，以新创建的表格显示。
+        $('#helptopics').html(table);
+    });
+}
+
+function experimentHandler(question) {
+    console.log("Experiment button clicked for question:", question);
+    // 设置问题输入框的值
+    $('#questionInput').val(question);
+    // 显示模态窗口
+    $('#experimentModal').modal('show');
+}
+
+function submitExperimentData() {
+    var experimentData = {
+        vTxt: $('#questionInput').val(),
+        LLMused: $('#llmInput').val(),
+        answerImage: $('#answerInput').val(),  // 假设答案是以文本形式输入
+        score: $('#scoreInput').val()
+    };
+
+    console.log("Submitting experiment data:", experimentData);
+
+    $.ajax({
+        url: '/experiment/add',  // 确保这是正确的 URL
+        type: 'POST',
+        contentType: 'application/json',  // 发送数据的格式
+        data: JSON.stringify(experimentData),  // 将对象转换为 JSON 字符串
+        success: function(response) {
+            console.log('Experiment data added:', response);
+            $('#successModal').modal('show');
+        },
+        error: function(xhr, status, error) {
+            console.error('Failed to add experiment data:', error);
+        }
+    });
+
+    // 关闭模态窗口
+    $('#experimentModal').modal('hide');
+}
+
+function navigateToPage() {
+    window.location.href = "/experiment/get";
+}
+
+</script>
+</body>
+</html>

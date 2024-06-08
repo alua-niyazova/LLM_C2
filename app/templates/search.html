@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            margin: 20px auto;
+            width: 90%;
+            border-collapse: collapse;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"], .button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover, .button:hover {
+            background-color: #0056b3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 99;
+            left: 50%;
+            top: 50%;
+            width: 80%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: auto;
+        }
+
+        .variationsDiv, .answersDiv, .detailDiv {
+            display: none;
+            position: fixed;
+            z-index: 97;
+            left: 50%;
+            top: 50%;
+            width: 50%;
+            max-height: 80%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .variationsDiv .table-wrapper, .answersDiv .table-wrapper, .detailDiv .table-wrapper {
+            max-height: 60vh; /* Adjust based on your design needs */
+            overflow-y: auto;
+        }
+
+        .closeBtn {
+            width: 100%;
+            padding: 10px;
+            background-color: orange;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .closeBtn:hover {
+            background-color: #0056b3;
+        }
+
+        .nav-bar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .nav-bar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .nav-bar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        .flashes {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flashes li {
+            margin: 0.5em;
+            padding: 0.5em;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .success {
+            color: white;
+            background-color: green;
+        }
+
+        .error {
+            background-color: red;
+        }
+
+        .info {
+            background-color: blue;
+        }
+
+        .message {
+            background-color: orange;
+        }
+    </style>
+    <!-- script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function showVariations(questionId) {
+            var llmName = $('#llm_name').val();
+            var score_min = $('#score_min').val();
+            var score_max = $('#score_max').val();
+            var category = $('#category').val();
+            var courseName = $('#course_name').val();
+
+            var url = `/search/variations/${questionId}?llm_name=${llmName}&score_min=${score_min}&score_max=${score_max}&category=${category}&course_name=${courseName}`;
+            $.getJSON(url, function(data) {
+                if (data.length === 0) {
+                    $("#variationsDiv .table-wrapper").html("<p>No variations found.</p>");
+                    $("#variationsDiv").show();
+                    return;
+                }
+
+                var firstVariation = data[0];
+                var otherVariations = data.slice(1);
+
+                var defaultVariation = '<table>';
+                defaultVariation += '<tr><th colspan="3">Original Question</th></tr>';
+                defaultVariation += '<tr><th>Question Code</th><th>Question Text</th><th>Actions</th></tr>';
+                defaultVariation += '<tr>';
+                defaultVariation += `<td>${firstVariation.code}</td>`;
+                defaultVariation += `<td>${firstVariation.text}</td>`;
+                defaultVariation += '<td>';
+                defaultVariation += `<button onclick="showAnswers(${firstVariation.id})">View Answers</button>`;
+                defaultVariation += '</td>';
+                defaultVariation += '</tr>';
+                defaultVariation += '</table>';
+
+                if (data.length === 1) {
+                    singleResult = defaultVariation + "<p>No more variations found except the default.</p>";
+                    $("#variationsDiv .table-wrapper").html(singleResult);
+                    $("#variationsDiv").show();
+                    return;
+                }
+
+                var otherVariation = '<table>';
+                otherVariation += '<tr><th colspan="3">Question Variations</th></tr>';
+                otherVariation += '<tr><th>Variation Code</th><th>Variation Text</th><th>Actions</th></tr>';
+
+                $.each(otherVariations, function(index, variation) {
+                    otherVariation += '<tr>';
+                    otherVariation += `<td>${variation.code}</td>`;
+                    otherVariation += `<td>${variation.text}</td>`;
+                    otherVariation += '<td>';
+                    otherVariation += `<button onclick="showAnswers(${variation.id})">View Answers</button>`;
+                    otherVariation += '</td>';
+                    otherVariation += '</tr>';
+                });
+
+                otherVariation += '</table>';
+
+                // Combine both tables
+                var combinedTables = defaultVariation + otherVariation;
+
+                $("#variationsDiv .table-wrapper").html(combinedTables);
+                $("#variationsDiv").show();
+            });
+        }
+
+        function showAnswers(variationId) {
+            disablePageScroll();
+            var llmName = $('#llm_name').val();
+            var score_min = $('#score_min').val();
+            var score_max = $('#score_max').val();
+            var category = $('#category').val();
+            var courseName = $('#course_name').val();
+
+            var url = `/search/answers/${variationId}?llm_name=${llmName}&score_min=${score_min}&score_max=${score_max}&category=${category}&course_name=${courseName}`;
+            $.getJSON(url, function(data) {
+                var table = '<table><tr><th colspan="4">LLM Answers</th></tr>';
+                table += '<tr><th>Name</th><th>Image</th><th>Average Score</th><th>Actions</th></tr>';
+
+                $.each(data, function(key, val) {
+                    var relativePath = val.image;
+                    var index = relativePath.lastIndexOf("/images/");
+                    if (index !== -1) {
+                        relativePath = relativePath.substring(index);
+                    }
+
+                    table += `<tr>
+                        <td>${val.name}</td>
+                        <td><img src="${relativePath}" alt="Answer Image" style="max-width:300px; cursor: pointer;" onclick="showLargeImage('${relativePath}')"></td>
+                        <td>${val.average_score.toFixed(2)}</td>
+                        <td><button onclick="showScoreDetails(${val.id})">Score Details</button></td>
+                    </tr>`;
+                });
+
+                table += '</table>';
+                $("#answersDiv .table-wrapper").html(table);
+                $("#answersDiv").show();
+            });
+        }
+
+        function showLargeImage(src) {
+            var modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = '1000';
+
+            var img = document.createElement('img');
+            img.src = src;
+            img.style.maxWidth = '90%';
+            img.style.maxHeight = '90%';
+            img.style.border = '5px solid white';
+
+            modal.onclick = function() {
+                document.body.removeChild(modal);
+            };
+
+            modal.appendChild(img);
+            document.body.appendChild(modal);
+        }
+
+        function showScoreDetails(answerId) {
+            $.getJSON(`/search/answer_details/${answerId}`, function(data) {
+                var table = '<table><tr><th>Score</th><th>Comment</th></tr>';
+                $.each(data, function(key, val) {
+                    table += `<tr><td>${val.score}</td><td>${val.comment}</td></tr>`;
+                });
+                table += '</table>';
+                table += '<button onclick="location.href=\'' +
+                    '{{ url_for("search.update_score", answer_id="0000") }}'.replace('0000', '') +
+                    answerId + '\'" type="button">Update Score</button>';
+                $("#detailDiv .table-wrapper").html(table);
+                $("#detailDiv").show();
+            });
+        }
+
+        function closeModal(divId) {
+            $(`#${divId}`).hide();
+            $(`#${divId} .table-wrapper`).empty();
+            enablePageScroll();
+        }
+
+        function resetSearch() {
+            var form = document.querySelector('form');
+            form.elements['llm_name'].value = '';
+            form.elements['score_min'].value = '';
+            form.elements['score_max'].value = '';
+            form.elements['category'].selectedIndex = 0;
+            form.elements['course_name'].value = '';
+            form.submit();
+        }
+
+        function disablePageScroll() {
+            var scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+            $('body').css({
+                'overflow': 'hidden',
+                'padding-right': scrollBarWidth + 'px'
+            });
+        }
+
+        function enablePageScroll() {
+            $('body').css({
+                'overflow': 'auto',
+                'padding-right': '0'
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="{{ url_for('request.view_requests') }}">Requests</a>
+        <a href="{{ url_for('exp.view_exp') }}">Experiments</a>
+        <a href="{{ url_for('course.list_courses') }}">Courses</a>
+        <a href="{{ url_for('user.logout') }}">Logout</a>
+    </div>
+    <h1>Search Questions and Answers</h1>
+    <form method="GET" action="{{ url_for('search.search') }}">
+        <input type="text" id="llm_name" name="llm_name" placeholder="LLM Name" value="{{ request.args.get('llm_name', '') }}">
+        <input type="number" id="score_min" name="score_min" min="0" max="5" step="0.1" placeholder="Min Score" value="{{ request.args.get('score_min', '') }}">
+        <input type="number" id="score_max" name="score_max" min="0" max="5" step="0.1" placeholder="Max Score" value="{{ request.args.get('score_max', '') }}">
+        <select id="category" name="category">
+            <option value="">All Category</option>
+            <option value="Comp">Computers and programming</option>
+            <option value="Math">Math</option>
+            <option value="Writ">Writing</option>
+        </select><br>
+        <input type="text" id="course_name" name="course_name" placeholder="Course Name or Number" value="{{ request.args.get('course_name_or_number', '') }}">
+        <button type="submit">Search</button>
+        <button type="button" class="button" onclick="resetSearch()">Reset</button>
+        <button onclick="location.href='{{ url_for('assignQ.add_question') }}'" type="button" class="button">Add a Question</button>
+    </form>
+
+    {% if results %}
+    <h2>Results</h2>
+    <table>
+        <tr>
+            <th>Question Code</th>
+            <th>Question Text</th>
+            <th>Category</th>
+            <th>Course Name</th>
+            <th>View Variations</th>
+        </tr>
+        {% for question in results %}
+        <tr>
+            <td>{{ question.qCode }}</td>
+            <td>{{ question.qText }}</td>
+            <td>
+                {% if question.course.category == CourseCategory.COMP %}
+                Computers and programming
+                {% elif question.course.category == CourseCategory.MATH %}
+                Math
+                {% elif question.course.category == CourseCategory.WRIT %}
+                Writing
+                {% endif %}
+            </td>
+            <td>{{ question.course.cName }}</td>
+            <td>
+                <button onclick="showVariations({{ question.id }}, '{{ request.args.get('llm_name', '') }}', '{{ request.args.get('score', '') }}', '{{ request.args.get('category', '') }}', '{{ request.args.get('course_name_or_number', '') }}')">View Variations</button>
+                <button onclick="location.href='{{ url_for('exp.exp_upload', question_id=question.id) }}'">Upload Experiment</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <h2>No results found. Please adjust your search criteria and try again.</h2>
+    {% endif %}
+
+    <div id="variationsDiv" class="variationsDiv">
+        <div class="table-wrapper"></div>
+        <button class="closeBtn" onclick="closeModal('variationsDiv')">Close</button>
+    </div>
+    <div id="answersDiv" class="answersDiv">
+        <div class="table-wrapper"></div>
+        <button class="closeBtn" onclick="closeModal('answersDiv')">Close</button>
+    </div>
+    <div id="detailDiv" class="detailDiv">
+        <div class="table-wrapper"></div>
+        <button class="closeBtn" onclick="closeModal('detailDiv')">Close</button>
+    </div>
+
+    <div  class="flashes">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul  class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+</body>
+</html>

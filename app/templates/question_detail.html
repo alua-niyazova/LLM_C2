@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Details</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.3/font/bootstrap-icons.min.css">
+    <style>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .show {
+            display: block;
+        }
+
+        .comments-btn {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form action="{{ url_for('details.question_detail', qCode=question.qCode) }}" method="post">
+            <h1>Question Details</h1>
+            <p><strong>LLM Used:</strong> {{ question.LLM_Name }}</p>
+            <p><strong>Question:</strong> {{ question.qText }}</p>
+            <p><strong>LLM Answer:</strong> {{ question.LLMAnswerImgr }}</p>
+            <p><strong>Human Score:</strong> {{ question.LLM_Score }}</p>
+            <button type="button" class="btn btn-primary comments-btn" onclick="toggleComments();">View Comments</button>
+            <button type="button" class="btn btn-primary" onclick="experimentHandler('{{ question.qText }}')">Conduct an experiment</button>
+
+            <div id="comments" class="hidden">
+                <h3>Comments</h3>
+                <p>{{ question.comments }}</p>
+            </div>
+        </form>
+    </div>
+    <!-- 成功提示 -->
+  <div id="successAlert" class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">
+        Experiment data has been successfully submitted!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <!-- 模态窗口 -->
+    <div class="modal fade" id="experimentModal" tabindex="-1" role="dialog" aria-labelledby="experimentModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="experimentModalLabel">Please conduct your experiment</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="experimentForm">
+                        <div class="form-group">
+                            <label for="questionInput">Please revise your question</label>
+                            <input type="text" class="form-control" id="questionInput" placeholder="Enter question">
+                        </div>
+                        <div class="form-group">
+                            <label for="llmInput">LLM used</label>
+                            <input type="text" class="form-control" id="llmInput" placeholder="Enter LLM used">
+                        </div>
+                        <div class="form-group">
+                            <label for="answerInput">LLM answer</label>
+                            <input type="text" class="form-control" id="answerInput" placeholder="Enter LLM answer">
+                        </div>
+                        <div class="form-group">
+                            <label for="scoreInput">Answer usefulness score</label>
+                            <input type="number" class="form-control" id="scoreInput" placeholder="Enter score (0-10)">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Off</button>
+                    <button type="button" class="btn btn-primary" onclick="submitExperimentData()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 切换显示评论
+        function toggleComments() {
+            var commentsDiv = document.getElementById('comments');
+            if (commentsDiv.style.display === 'none' || commentsDiv.style.display === '') {
+                commentsDiv.style.display = 'block';
+            } else {
+                commentsDiv.style.display = 'none';
+            }
+        }
+
+        // 打开实验模态窗口
+        function experimentHandler(question) {
+            console.log("Experiment button clicked for question:", question);
+            $('#questionInput').val(question); // 设置问题输入框的值
+            $('#experimentModal').modal('show'); // 显示模态窗口
+        }
+
+        // 提交实验数据
+function submitExperimentData() {
+        var experimentData = {
+            vTxt: $('#questionInput').val(),
+            LLMused: $('#llmInput').val(),
+            answerImage: $('#answerInput').val(), // 假设答案是以文本形式输入
+            score: $('#scoreInput').val()
+        };
+
+        console.log("Submitting experiment data:", experimentData);
+
+        $.ajax({
+            url: '/experiment/add', // 确保这是正确的 URL
+            type: 'POST',
+            contentType: 'application/json', // 发送数据的格式
+            data: JSON.stringify(experimentData), // 将对象转换为 JSON 字符串
+            success: function (response) {
+                console.log('Experiment data added:', response);
+                // 显示成功提示
+                $('#successAlert').show();
+                // 关闭模态窗口
+                $('#experimentModal').modal('hide');
+                // 重置表单
+                $('#experimentForm')[0].reset();
+            },
+            error: function (xhr, status, error) {
+                console.error('Failed to add experiment data:', error);
+                alert('Error: Unable to submit experiment data.');
+            }
+        });
+    }
+    </script>
+</body>
+
+</html>
